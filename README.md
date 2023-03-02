@@ -6,6 +6,19 @@ Using Cloudflare KV to store Caddy server configuration
 
 using /etc/caddy/Caddyfile for init
 
+### config.json
+
+```json
+{
+  "caddyfile": "caddyfile path, if the value is empty, use the inner Caddyfile.",
+  "id": "The caddy ID, if the value is empty, use the public IP as the value of ID.",
+  "api_token": "api token, required",
+  "account_id": "account id, required",
+  "namespace_id": "kv namespace id, required"
+}
+```
+
+
 ## 
 
 ID: public IP
