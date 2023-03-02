@@ -51,7 +51,7 @@ func (d *Dispatcher) TouchDefault() ([]byte, []caddyconfig.Warning, error) {
 }
 
 func (d *Dispatcher) Start() {
-	go d.loopCheckConfig()
+	d.loopCheckConfig()
 }
 
 func (d *Dispatcher) loopCheckConfig() {
