@@ -13,7 +13,7 @@ type CFKV struct {
 }
 
 func NewKV(cfg *Config) *CFKV {
-	api, err := cloudflare.New(cfg.ApiKey, cfg.Email)
+	api, err := cloudflare.NewWithAPIToken(cfg.ApiToken)
 	if err != nil {
 		panic(err)
 	}

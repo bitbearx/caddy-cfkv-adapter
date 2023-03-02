@@ -17,22 +17,20 @@ func loadConfig() *Config {
 		panic(err)
 	}
 
-	var cfg *Config
-	err = json.Unmarshal(raw, cfg)
+	var cfg Config
+	err = json.Unmarshal(raw, &cfg)
 	if err != nil {
 		panic(err)
 	}
-	return cfg
+	return &cfg
 }
 
 func TestDispatcher_MustDefault(t *testing.T) {
-	kv := NewKV(loadConfig())
-
-	d := &Dispatcher{kv: kv}
+	d := NewDispatcher(loadConfig())
 	got, got1, err := d.TouchDefault()
 
 	caddy.Log().Info("got", zap.String("config", string(got)))
 	assert.Nil(t, err)
-	assert.Equal(t, len(got1), 0)
+	assert.Equal(t, len(got1), 1)
 	assert.NotEmpty(t, got)
 }

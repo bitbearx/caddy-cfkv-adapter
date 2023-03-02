@@ -1,6 +1,5 @@
 {
-  "email": "admin@bitbear.net",
-  "api_key": "",
+  "api_token": "",
   "account_id": "",
   "namespace_id": ""
 }

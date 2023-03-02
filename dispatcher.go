@@ -27,8 +27,14 @@ func NewDispatcher(cfg *Config) *Dispatcher {
 
 // TouchDefault parse Caddyfile and return
 func (d *Dispatcher) TouchDefault() ([]byte, []caddyconfig.Warning, error) {
-	d.kv.Set(d.keyUpdateAt(), []byte("0"))
-	d.kv.Set(d.keyCaddyfile(), CaddyFile)
+	err := d.kv.Set(d.keyUpdateAt(), []byte("0"))
+	if err != nil {
+		return nil, nil, err
+	}
+	err = d.kv.Set(d.keyCaddyfile(), CaddyFile)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	return caddyfile.Adapter{ServerType: httpcaddyfile.ServerType{}}.Adapt(CaddyFile, nil)
 }

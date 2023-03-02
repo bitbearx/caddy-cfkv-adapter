@@ -1,0 +1,40 @@
+{
+	# General Options
+	# debug
+	http_port    80
+	default_bind 0.0.0.0
+	log default {
+		output  stdout
+		format  json
+		level   INFO
+	}
+
+	# TLS Options
+	auto_https off
+	email admin@bitbear.net
+
+	# Server Options
+	servers :80 {
+		name http
+		timeouts {
+			read_body   10s
+			read_header 10s
+			write       10s
+			idle        10s
+		}
+		# trusted_proxies <module> ...
+		# metrics
+		log_credentials
+		protocols h1 h2 h2c h3
+		strict_sni_host insecure_off
+	}
+
+	# Event options
+	# events {
+	# 	on <event> <handler...>
+	# }
+}
+
+:2016 {
+	respond "Goodbye, world!"
+}

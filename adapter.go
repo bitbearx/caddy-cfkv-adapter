@@ -20,8 +20,7 @@ type KVer interface {
 }
 
 type Config struct {
-	Email       string `json:"email"`
-	ApiKey      string `json:"api_key"`
+	ApiToken    string `json:"api_token"`
 	AccountID   string `json:"account_id"`
 	NamespaceID string `json:"namespace_id"`
 }
