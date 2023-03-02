@@ -17,6 +17,7 @@ type KVer interface {
 	Get(key string) ([]byte, error)
 	Delete(key string) error
 	Set(key string, value []byte) error
+	List(prefix string) ([][]byte, error)
 }
 
 type Config struct {

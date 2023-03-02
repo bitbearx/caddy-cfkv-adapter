@@ -79,3 +79,25 @@ func (kv *CFKV) Set(key string, value []byte) error {
 	}
 	return nil
 }
+
+func (kv *CFKV) List(prefix string) ([][]byte, error) {
+	cursor := ""
+	for {
+		resp, err := kv.api.ListWorkersKVKeys(context.Background(),
+			cloudflare.AccountIdentifier(kv.cfg.AccountID),
+			cloudflare.ListWorkersKVsParams{
+				NamespaceID: kv.cfg.NamespaceID,
+				Prefix:      prefix,
+				Limit:       50,
+				Cursor:      cursor,
+			})
+		if err != nil {
+			caddy.Log().Error("error listing from kv: ", zap.Error(err))
+			return nil, err
+		}
+		if resp.HasMorePages() {
+			cursor = resp.Cursor
+		}
+		resp.Messages
+	}
+}
