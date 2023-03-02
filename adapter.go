@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig"
 )
 
@@ -56,7 +57,7 @@ func (a *Adapter) Adapt(body []byte, options map[string]any) ([]byte, []caddycon
 		panic(err)
 	}
 
-	dispatcher := NewDispatcher(cfg)
+	dispatcher := NewDispatcher(cfg, caddy.Load)
 
 	configRaw, warning, err := dispatcher.TouchDefault()
 	if err != nil {

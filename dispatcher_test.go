@@ -26,7 +26,7 @@ func loadConfig() *Config {
 }
 
 func TestDispatcher_MustDefault(t *testing.T) {
-	d := NewDispatcher(loadConfig())
+	d := NewDispatcher(loadConfig(), caddy.Load)
 	got, got1, err := d.TouchDefault()
 
 	caddy.Log().Info("got", zap.String("config", string(got)))

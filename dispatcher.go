@@ -19,20 +19,25 @@ const (
 	CADDY_UPDATE_AT  = "CADDY_%s_UPDATE_AT"
 )
 
+type LoadConfig func(cfgJSON []byte, forceReload bool) error
+
 type Dispatcher struct {
 	kv KVer
 
 	lastUpdateAt int64
 	httpAdapter  caddyfile.Adapter
+
+	load LoadConfig
 }
 
-func NewDispatcher(cfg *Config) *Dispatcher {
+func NewDispatcher(cfg *Config, load LoadConfig) *Dispatcher {
 	var kv KVer = NewKV(cfg)
 	var httpAdapter = caddyfile.Adapter{ServerType: httpcaddyfile.ServerType{}}
 	return &Dispatcher{
 		kv:           kv,
 		lastUpdateAt: 0,
 		httpAdapter:  httpAdapter,
+		load:         load,
 	}
 }
 
@@ -70,7 +75,7 @@ func (d *Dispatcher) loopCheckConfig() {
 				continue
 			}
 			if updated {
-				err = caddy.Load(cfg, false)
+				err = d.load(cfg, false)
 				if err != nil {
 					caddy.Log().Error("error caddy.Load: ", zap.Error(err))
 					continue
