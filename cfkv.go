@@ -128,11 +128,13 @@ func (kv *CFKV) List(prefix string) (keys []string, err error) {
 			caddy.Log().Error("error listing from kv: ", zap.Error(err))
 			return nil, err
 		}
-		if resp.HasMorePages() {
-			cursor = resp.Cursor
-		}
 		for _, result := range resp.Result {
 			keys = append(keys, result.Name)
+		}
+		if resp.HasMorePages() {
+			cursor = resp.Cursor
+		} else {
+			break
 		}
 	}
 	return keys, nil
