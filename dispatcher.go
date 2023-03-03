@@ -1,8 +1,8 @@
 package cfkvadapter
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/caddyserver/caddy/v2"
@@ -66,22 +66,19 @@ func (d *Dispatcher) loopCheckConfig() {
 		}
 	}()
 
-	for {
-		select {
-		case <-time.After(10 * time.Second):
-			cfg, updated, updateAt, err := d.checkConfig()
+	for range time.After(10 * time.Second) {
+		cfg, updated, updateAt, err := d.checkConfig()
+		if err != nil {
+			caddy.Log().Error("error checkConfig: ", zap.Error(err))
+			continue
+		}
+		if updated {
+			err = d.load(cfg, false)
 			if err != nil {
-				caddy.Log().Error("error checkConfig: ", zap.Error(err))
+				caddy.Log().Error("error caddy.Load: ", zap.Error(err))
 				continue
 			}
-			if updated {
-				err = d.load(cfg, false)
-				if err != nil {
-					caddy.Log().Error("error caddy.Load: ", zap.Error(err))
-					continue
-				}
-				d.lastUpdateAt = updateAt
-			}
+			d.lastUpdateAt = updateAt
 		}
 	}
 }
@@ -115,28 +112,29 @@ func (d *Dispatcher) checkConfig() (cfg []byte, updated bool, updateAt int64, er
 		return
 	}
 
-	// fetch caddyfile
-	caddyfile, err := d.kv.Get(d.keyCaddyfile())
+	// fetch caddyfileTemp
+	caddyfileTemp, err := d.kv.Get(d.keyCaddyfile())
 	if err != nil {
 		caddy.Log().Error("checkConfig: Get caddyfile error: ", zap.Error(err))
 		return
 	}
-	if len(caddyfile) == 0 {
+	if len(caddyfileTemp) == 0 {
 		return
 	}
 
 	// assemble caddyfile
-	var sb strings.Builder
-	sb.Write(caddyfile)
+	var sb bytes.Buffer
+	sb.Write(caddyfileTemp)
 	sb.Write([]byte("\n"))
 	for _, v := range values {
 		sb.Write(v)
 		sb.Write([]byte("\n"))
 	}
+	formatedCaddyFile := caddyfile.Format(sb.Bytes())
 
 	// parse caddyfile
 	var warnings []caddyconfig.Warning
-	cfg, warnings, err = d.httpAdapter.Adapt(caddyfile, nil)
+	cfg, warnings, err = d.httpAdapter.Adapt(formatedCaddyFile, nil)
 	if err != nil {
 		return
 	}
