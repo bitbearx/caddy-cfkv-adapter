@@ -88,6 +88,8 @@ func (a *Adapter) prepare(cfg *Config) error {
 	initCaddyFile = raw
 	if cfg.ID == "" {
 		ID = GetPublicIP()
+	} else {
+		ID = cfg.ID
 	}
 	return nil
 }
