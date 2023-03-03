@@ -67,6 +67,10 @@ func (d *Dispatcher) TouchDefault() ([]byte, []caddyconfig.Warning, error) {
 }
 
 func (d *Dispatcher) Start() {
+	if ID == "" {
+		panic("ID is empty")
+	}
+
 	d.loopCheckConfig()
 }
 
