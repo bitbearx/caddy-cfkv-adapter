@@ -66,7 +66,9 @@ func (d *Dispatcher) loopCheckConfig() {
 		}
 	}()
 
-	for range time.After(10 * time.Second) {
+	for {
+		<-time.After(10 * time.Second)
+
 		cfg, updated, updateAt, err := d.checkConfig()
 		if err != nil {
 			caddy.Log().Error("error checkConfig: ", zap.Error(err))
