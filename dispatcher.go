@@ -17,6 +17,7 @@ const (
 	CADDY_SRV        = "CADDY_%s_SRV_%s"
 	CADDY_SRV_PREFIX = "CADDY_%s_SRV"
 	CADDY_UPDATE_AT  = "CADDY_%s_UPDATE_AT"
+	CADDY_PREFIX     = "CADDY_%s"
 )
 
 type LoadConfig func(cfgJSON []byte, forceReload bool) error
@@ -43,14 +44,24 @@ func NewDispatcher(cfg *Config, load LoadConfig) *Dispatcher {
 
 // TouchDefault parse Caddyfile and return
 func (d *Dispatcher) TouchDefault() ([]byte, []caddyconfig.Warning, error) {
-	err := d.kv.Set(d.keyUpdateAt(), []byte("0"))
+	existsKeySet := map[string]struct{}{}
+	existsKeys, err := d.kv.List(d.keyPrefix())
 	if err != nil {
 		return nil, nil, err
 	}
-	err = d.kv.Set(d.keyCaddyfile(), initCaddyFile)
-	if err != nil {
-		return nil, nil, err
+	for _, key := range existsKeys {
+		existsKeySet[key] = struct{}{}
 	}
+
+	notFoundThenInitFunc := func(key string, initValue []byte) error {
+		if _, ok := existsKeySet[key]; ok {
+			return nil
+		}
+		return d.kv.Set(key, initValue)
+	}
+
+	notFoundThenInitFunc(d.keyUpdateAt(), []byte("0"))
+	notFoundThenInitFunc(d.keyCaddyfile(), initCaddyFile)
 
 	return d.httpAdapter.Adapt(initCaddyFile, nil)
 }
@@ -148,6 +159,7 @@ func (d *Dispatcher) checkConfig() (cfg []byte, updated bool, updateAt int64, er
 
 func (d *Dispatcher) keyUpdateAt() string                      { return d.formatKey(CADDY_UPDATE_AT, ID) }
 func (d *Dispatcher) keySrvPrefix() string                     { return d.formatKey(CADDY_SRV_PREFIX, ID) }
+func (d *Dispatcher) keyPrefix() string                        { return d.formatKey(CADDY_PREFIX, ID) }
 func (d *Dispatcher) keySRV(srvID string) string               { return d.formatKey(CADDY_SRV, ID, srvID) }
 func (d *Dispatcher) keyCaddyfile() string                     { return d.formatKey(CADDY_CADDYFILE, ID) }
 func (d *Dispatcher) formatKey(key string, vals ...any) string { return fmt.Sprintf(key, vals...) }
